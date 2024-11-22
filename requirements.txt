@@ -1,36 +1,49 @@
 
 aiofiles
 aiohttp
-asyncio  
+#asyncio==3.4.3
+asyncio
 beautifulsoup4
 dnspython
-search_engine_parser  
-requests  
-ffmpeg-python  
-librosa>=0.8.0  
-soundfile>=0.10.3  
-audioread>=2.1.9  
-pydub>=0.25.1  
-scipy>=1.9.0  
-telethon==1.33.1  
-py-tgcalls==0.9.7  
-motor==3.3.2  
-pymongo==4.6.3  
-python-dotenv  
-pillow==9.5.0  
-qrcode  
-future==0.18.3  
-psutil  
-tgcrypto  
-unidecode  
-wget  
-git+https://github.com/KurimuzonAkuma/pyrogram@dev  # Pyrogram library for Telegram API
-yt-dlp  # YouTube video downloader with additional features
-bing_image_downloader  # Tool for downloading images from Bing
-git+https://github.com/alexmercerind/youtube-search-python@main  # YouTube search utility
-git+https://github.com/joetats/youtube_search@master  # Another YouTube search utility
-git+https://github.com/Vivekkumar-IN/TheApi@main  # Custom API library
-git+https://github.com/TEAMPURVI/PurviAPI  # Another custom API library
-gpytranslate  
-spotipy  
-speedtest-cli  
+ffmpeg-python
+future==0.18.3
+search_engine_parser
+telethon==1.33.1
+gitpython
+httpx[http2]
+heroku3
+hachoir
+motor==3.3.2
+pillow==9.5.0
+psutil
+py-tgcalls==0.9.7
+pykeyboard
+pymongo==4.6.3
+python-dotenv
+pyyaml==6.0.1
+requests
+qrcode
+SafoneAPI==1.0.65
+tgcrypto
+gpytranslate
+MukeshAPI
+search_engine_parser
+googlesearch-python
+youtube-search-python
+spotipy
+telegraph
+speedtest-cli
+unidecode
+urllib3
+wget
+git+https://github.com/KurimuzonAkuma/pyrogram@dev
+yt-dlp
+bing_image_downloader
+git+https://github.com/alexmercerind/youtube-search-python@main
+git+https://github.com/joetats/youtube_search@master
+git+https://github.com/Vivekkumar-IN/TheApi@main
+bing-image-urls
+git+https://github.com/TEAMPURVI/PurviAPI
+
+
+Can u give sound quality Higher and stereo quality codes  recruitment.text
