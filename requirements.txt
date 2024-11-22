@@ -30,6 +30,7 @@ search_engine_parser
 googlesearch-python
 youtube-search-python
 spotipy
+bing-image-urls
 telegraph
 speedtest-cli
 unidecode
