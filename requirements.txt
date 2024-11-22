@@ -1,45 +1,52 @@
+# Asynchronous I/O Libraries
 aiofiles
 aiohttp
-#asyncio==3.4.3
-asyncio
+asyncio  # Ensure you have the latest version
+
+# Web Scraping and Parsing
 beautifulsoup4
 dnspython
-ffmpeg-python
-future==0.18.3
-search_engine_parser
-telethon==1.33.1
-gitpython
-httpx[http2]
-heroku3
-hachoir
-motor==3.3.2
-pillow==9.5.0
-psutil
-py-tgcalls==0.9.7
-pykeyboard
-pymongo==4.6.3
-python-dotenv
-pyyaml==6.0.1
-requests
-qrcode
-SafoneAPI==1.0.65
-tgcrypto
-gpytranslate
-MukeshAPI
-search_engine_parser
-googlesearch-python
-youtube-search-python
-spotipy
-telegraph
-speedtest-cli
-unidecode
-urllib3
-wget
-git+https://github.com/KurimuzonAkuma/pyrogram@dev
-yt-dlp
-bing_image_downloader
-git+https://github.com/alexmercerind/youtube-search-python@main
-git+https://github.com/joetats/youtube_search@master
-git+https://github.com/Vivekkumar-IN/TheApi@main
-bing-image-urls
-git+https://github.com/TEAMPURVI/PurviAPI
+search_engine_parser  # Note: This appears twice; removed duplicate
+requests  # For making HTTP requests
+
+# Audio Processing Libraries
+ffmpeg-python  # For audio/video processing
+librosa>=0.8.0  # For music and audio analysis
+soundfile>=0.10.3  # For reading and writing sound files
+audioread>=2.1.9  # To decode audio files
+pydub>=0.25.1  # For simple audio manipulation
+scipy>=1.9.0  # For advanced signal processing
+
+# Telegram Libraries
+telethon==1.33.1  # Telegram client library
+py-tgcalls==0.9.7  # For Telegram voice calls
+
+# Database and File Management
+motor==3.3.2  # Async MongoDB driver
+pymongo==4.6.3  # MongoDB driver for Python
+python-dotenv  # To load environment variables from .env files
+
+# Image and QR Code Processing
+pillow==9.5.0  # Python Imaging Library (PIL)
+qrcode  # For generating QR codes
+
+# Utility Libraries
+future==0.18.3  # Compatibility library for Python 2 and 3
+psutil  # System and process utilities
+tgcrypto  # Crypto library for Telegram
+unidecode  # ASCII transliteration for Unicode text
+wget  # Simple file downloading utility
+
+# GitHub Repositories for Additional Functionality
+git+https://github.com/KurimuzonAkuma/pyrogram@dev  # Pyrogram library for Telegram API
+yt-dlp  # YouTube video downloader with additional features
+bing_image_downloader  # Tool for downloading images from Bing
+git+https://github.com/alexmercerind/youtube-search-python@main  # YouTube search utility
+git+https://github.com/joetats/youtube_search@master  # Another YouTube search utility
+git+https://github.com/Vivekkumar-IN/TheApi@main  # Custom API library
+git+https://github.com/TEAMPURVI/PurviAPI  # Another custom API library
+
+# Other Libraries
+gpytranslate  # Google Translate API wrapper
+spotipy  # Spotify Web API client
+speedtest-cli  # CLI tool for testing internet speed
