@@ -1,4 +1,3 @@
-
 # Asynchronous I/O Libraries
 aiofiles
 aiohttp
@@ -7,59 +6,54 @@ asyncio  # Use the latest version compatible with your project
 # Web Scraping and Parsing
 beautifulsoup4
 dnspython
-search_engine_parser  # Note: This appears twice; removed duplicate
-googlesearch-python  # For Google search functionality
-httpx[http2]  # HTTP client with support for HTTP/2
+search_engine_parser
+googlesearch-python
+httpx[http2]
 
 # Audio and Video Processing
-ffmpeg-python  # For audio/video processing
+ffmpeg-python
 
 # Database and File Management
-motor==3.3.2  # Async MongoDB driver
-pymongo==4.6.3  # MongoDB driver for Python
+motor==3.3.2
+pymongo==4.6.3
 
 # Telegram Libraries
-telethon==1.33.1  # Telegram client library
-py-tgcalls==0.9.7  # For Telegram voice calls
+telethon==1.33.1
+py-tgcalls==0.9.7
 
 # Image and QR Code Processing
-pillow==9.5.0  # Python Imaging Library (PIL)
-qrcode  # For generating QR codes
+pillow==9.5.0
+qrcode
+bing_image_downloader  # Added library for downloading images from Bing
+bing-image-urls  # Added library for fetching Bing image URLs
 
-# Utility Libraries
-future==0.18.3  # Compatibility library for Python 2 and 3
-psutil  # System and process utilities
-tgcrypto  # Crypto library for Telegram
-unidecode  # ASCII transliteration for Unicode text
-wget  # Simple file downloading utility
+# Video and YouTube Libraries
+yt-dlp  # YouTube downloader with additional features
+git+https://github.com/alexmercerind/youtube-search-python@main  # YouTube search utility from GitHub
+git+https://github.com/joetats/youtube_search@master  # Another YouTube search utility from GitHub
 
 # API Libraries
-SafoneAPI==1.0.65  # Specific API wrapper
-MukeshAPI  # Another API wrapper
-gpytranslate  # Google Translate API wrapper
-spotipy  # Spotify Web API client
+SafoneAPI==1.0.65
+MukeshAPI
+gpytranslate
+spotipy
+git+https://github.com/Vivekkumar-IN/TheApi@main  # Another API wrapper from GitHub
+git+https://github.com/TEAMPURVI/PurviAPI  # Purvi API wrapper from GitHub
+
+# Utility Libraries
+future==0.18.3
+psutil
+tgcrypto
+unidecode
+wget
+python-dotenv
+pyyaml==6.0.1
+speedtest-cli
+telegraph
+
+# Git Libraries
+gitpython
 
 # Other Libraries
-gitpython  # Git repository management
-heroku3  # Heroku API client for Python
-hachoir  # For parsing binary files
-pykeyboard  # For keyboard input handling
-python-dotenv  # To load environment variables from .env files
-pyyaml==6.0.1  # YAML parser and emitter for Python
-speedtest-cli  # CLI tool for testing internet speed
-telegraph  # For creating and managing Telegraph articles
-youtube-search-python  # YouTube search utility
-
-# Additional Libraries
-urllib3  # HTTP library with thread-safe connection pooling
-git+https://github.com/KurimuzonAkuma/pyrogram@dev
-yt-dlp
-bing_image_downloader
-git+https://github.com/alexmercerind/youtube-search-python@main
-git+https://github.com/joetats/youtube_search@master
-git+https://github.com/Vivekkumar-IN/TheApi@main
-bing-image-urls
-git+https://github.com/TEAMPURVI/PurviAPI
-
-
-Can u give sound quality Higher and stereo quality codes  recruitment.text
+hachoir
+pykeyboard
