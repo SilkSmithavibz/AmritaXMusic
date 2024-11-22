@@ -1,59 +1,70 @@
-# Asynchronous I/O Libraries
+# Async Libraries
 aiofiles
 aiohttp
-asyncio  # Use the latest version compatible with your project
+# asyncio is part of the Python standard library; uncomment if you need a specific version
+# asyncio==3.4.3
 
 # Web Scraping and Parsing
 beautifulsoup4
 dnspython
-search_engine_parser
 googlesearch-python
-httpx[http2]
+search_engine_parser
+telegraph
 
-# Audio and Video Processing
+# Image and Video Processing
 ffmpeg-python
+pillow==9.5.0
+qrcode
+wget
+bing_image_downloader
+yt-dlp
 
-# Database and File Management
+# Database and Storage
 motor==3.3.2
 pymongo==4.6.3
+psutil
 
 # Telegram Libraries
 telethon==1.33.1
 py-tgcalls==0.9.7
-
-# Image and QR Code Processing
-pillow==9.5.0
-qrcode
-bing_image_downloader  # Added library for downloading images from Bing
-bing-image-urls  # Added library for fetching Bing image URLs
-
-# Video and YouTube Libraries
-yt-dlp  # YouTube downloader with additional features
-git+https://github.com/alexmercerind/youtube-search-python@main  # YouTube search utility from GitHub
-git+https://github.com/joetats/youtube_search@master  # Another YouTube search utility from GitHub
+tgcrypto
+git+https://github.com/KurimuzonAkuma/pyrogram@dev
 
 # API Libraries
 SafoneAPI==1.0.65
 MukeshAPI
 gpytranslate
 spotipy
-git+https://github.com/Vivekkumar-IN/TheApi@main  # Another API wrapper from GitHub
-git+https://github.com/TEAMPURVI/PurviAPI  # Purvi API wrapper from GitHub
 
-# Utility Libraries
+# General Utilities
 future==0.18.3
-psutil
-tgcrypto
+gitpython
+heroku3
+hachoir
 unidecode
-wget
+speedtest-cli
 python-dotenv
 pyyaml==6.0.1
-speedtest-cli
-telegraph
+requests
 
-# Git Libraries
-gitpython
+# Audio Processing Libraries for Higher Sound Quality and Stereo Processing:
+librosa>=0.8.0  # For music and audio analysis, including stereo support
+soundfile>=0.10.3  # For reading and writing sound files in various formats
+audioread>=2.1.9  # To decode audio files for playback and processing
+pydub>=0.25.1  # For simple audio manipulation (e.g., slicing, concatenation)
+scipy>=1.9.0  # For advanced signal processing techniques
 
-# Other Libraries
-hachoir
-pykeyboard
+# GitHub Repositories (for additional functionality)
+git+https://github.com/alexmercerind/youtube-search-python@main
+git+https://github.com/joetats/youtube_search@master
+git+https://github.com/Vivekkumar-IN/TheApi@main
+git+https://github.com/TEAMPURVI/PurviAPI
+
+# Additional Libraries for Image URLs and Searches
+bing-image-urls
+
+# YouTube Search Packages (if needed)
+youtube-search-python
+
+# Additional Libraries (if needed)
+pykeyboard  # If using keyboard controls in your app.
