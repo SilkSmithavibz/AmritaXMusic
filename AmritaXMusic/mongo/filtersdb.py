@@ -1,4 +1,4 @@
-from PURVIMUSIC.utils.mongo import db
+from AmritaXMusic.utils.mongo import db
 
 filters = db.filters["filters"] 
 
