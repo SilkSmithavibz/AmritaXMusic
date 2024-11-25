@@ -25,5 +25,5 @@ if __name__ == "__main__":
     # List all audio files in the repository
     for filename in os.listdir('.'):
         if filename.endswith('.wav'):  # Change this if you have different audio formats
-            output_filename = f"converted_{filename}"  # Prefix for converted files
+            output_filename = f"{os.path.splitext(filename)[0]}.wav"  # Change extension to .wav
             convert_audio(filename, output_filename, bitrate='320k')
