@@ -300,7 +300,7 @@ class YouTubeAPI:
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
                 "format": bestaudio/best,
-                "extractaudio" True,
+                "extractaudio": True,
                 "outtmpl": fpath,
                 "geo_bypass": True,
                 "nocheckcertificate": True,
