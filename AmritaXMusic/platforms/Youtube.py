@@ -299,8 +299,8 @@ class YouTubeAPI:
         def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
-                "format": bestaudio/best,
                 "extractaudio": True,
+                "format": 'bestaudio/best',
                 "outtmpl": fpath,
                 "geo_bypass": True,
                 "nocheckcertificate": True,
