@@ -311,7 +311,6 @@ class YouTubeAPI:
                     {
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'wav',  
-                        'preferredquality': '320',  
                         'audio_bitrate': '320k',    
                         'audio_channels': 2,
                     }
