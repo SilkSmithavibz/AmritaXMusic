@@ -35,6 +35,7 @@ speedtest-cli
 unidecode
 urllib3
 wget
+numpy
 # Audio Processing Libraries for Higher Sound Quality and Stereo Processing:
 librosa>=0.8.0  # For music and audio analysis, including stereo support
 soundfile>=0.10.3  # For reading and writing sound files in various formats
