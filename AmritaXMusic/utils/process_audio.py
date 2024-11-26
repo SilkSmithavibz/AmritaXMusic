@@ -1,4 +1,5 @@
 from pydub import AudioSegment
+from pydub.effects import compress_dynamic_range
 import numpy as np
 from scipy.signal import butter, lfilter
 from io import BytesIO
@@ -23,6 +24,15 @@ def increase_sample_rate(audio: AudioSegment, new_sample_rate: int) -> AudioSegm
     # Resample the audio
     return audio.set_frame_rate(new_sample_rate)
 
+def compress_audio(audio: AudioSegment) -> AudioSegment:
+    """
+    Apply dynamic range compression to audio.
+    
+    :param audio: The input audio segment.
+    :return: Compressed audio segment.
+    """
+    return compress_dynamic_range(audio)
+    
 def butter_highpass(cutoff, fs, order=5):
     nyquist = 0.5 * fs
     normal_cutoff = cutoff / nyquist
