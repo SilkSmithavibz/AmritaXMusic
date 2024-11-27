@@ -1,667 +1,436 @@
-import random
-import string
-from pyrogram import filters
-from pyrogram.types import InlineKeyboardMarkup, InputMediaPhoto, Message
+import math
+
 from pyrogram.types import InlineKeyboardButton
-from pytgcalls.exceptions import NoActiveGroupCall
 
-import config
-from AmritaXMusic import Apple, Resso, SoundCloud, Spotify, Telegram, YouTube, app
-from AmritaXMusic.core.call import RAUSHAN
-from AmritaXMusic.utils import seconds_to_min, time_to_seconds
-from AmritaXMusic.utils.channelplay import get_channeplayCB
-from AmritaXMusic.utils.decorators.language import languageCB
-from AmritaXMusic.utils.decorators.play import PlayWrapper
-from AmritaXMusic.utils.database import is_served_user
-from AmritaXMusic.utils.formatters import formats
-from AmritaXMusic.utils.inline import (
-    botplaylist_markup,
-    livestream_markup,
-    playlist_markup,
-    slider_markup,
-    track_markup,
-)
-from AmritaXMusic.utils.logger import play_logs
-from AmritaXMusic.utils.stream.stream import stream
-from config import BANNED_USERS, lyrical
+from AmritaXMusic.utils.formatters import time_to_seconds
 
 
-@app.on_message(
-    filters.command(
+def track_markup(_, videoid, user_id, channel, fplay):
+    buttons = [
         [
-            "play",
-            "vplay",
-            "cplay",
-            "cvplay",
-            "playforce",
-            "vplayforce",
-            "cplayforce",
-            "cvplayforce",
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}",
+            ),
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}",
+            ),
         ],
-        prefixes=["/", "!", "."],
-    )
-    & filters.group
-    & ~BANNED_USERS
-)
-@PlayWrapper
-async def play_commnd(
-    client,
-    message: Message,
-    _,
-    chat_id,
-    video,
-    channel,
-    playmode,
-    url,
-    fplay,
-):
-    
-    mystic = await message.reply_text(
-        _["play_2"].format(channel) if channel else _["play_1"]
-    )
-    plist_id = None
-    slider = None
-    plist_type = None
-    spotify = None
-    user_id = message.from_user.id
-    user_name = message.from_user.first_name
-
-    audio_telegram = (
-        (message.reply_to_message.audio or message.reply_to_message.voice)
-        if message.reply_to_message
-        else None
-    )
-    video_telegram = (
-        (message.reply_to_message.video or message.reply_to_message.document)
-        if message.reply_to_message
-        else None
-    )
-    if audio_telegram:
-        if audio_telegram.file_size > 104857600:
-            return await mystic.edit_text(_["play_5"])
-        duration_min = seconds_to_min(audio_telegram.duration)
-        if (audio_telegram.duration) > config.DURATION_LIMIT:
-            return await mystic.edit_text(
-                _["play_6"].format(config.DURATION_LIMIT_MIN, app.mention)
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
             )
-        file_path = await Telegram.get_filepath(audio=audio_telegram)
-        if await Telegram.download(_, message, mystic, file_path):
-            message_link = await Telegram.get_link(message)
-            file_name = await Telegram.get_filename(audio_telegram, audio=True)
-            dur = await Telegram.get_duration(audio_telegram, file_path)
-            details = {
-                "title": file_name,
-                "link": message_link,
-                "path": file_path,
-                "dur": dur,
-            }
-
-            try:
-                await stream(
-                    _,
-                    mystic,
-                    user_id,
-                    details,
-                    chat_id,
-                    user_name,
-                    message.chat.id,
-                    streamtype="telegram",
-                    forceplay=fplay,
-                )
-            except Exception as e:
-                ex_type = type(e).__name__
-                err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-                return await mystic.edit_text(err)
-            return await mystic.delete()
-        return
-    elif video_telegram:
-        if message.reply_to_message.document:
-            try:
-                ext = video_telegram.file_name.split(".")[-1]
-                if ext.lower() not in formats:
-                    return await mystic.edit_text(
-                        _["play_7"].format(f"{' | '.join(formats)}")
-                    )
-            except:
-                return await mystic.edit_text(
-                    _["play_7"].format(f"{' | '.join(formats)}")
-                )
-        if video_telegram.file_size > config.TG_VIDEO_FILESIZE_LIMIT:
-            return await mystic.edit_text(_["play_8"])
-        file_path = await Telegram.get_filepath(video=video_telegram)
-        if await Telegram.download(_, message, mystic, file_path):
-            message_link = await Telegram.get_link(message)
-            file_name = await Telegram.get_filename(video_telegram)
-            dur = await Telegram.get_duration(video_telegram, file_path)
-            details = {
-                "title": file_name,
-                "link": message_link,
-                "path": file_path,
-                "dur": dur,
-            }
-            try:
-                await stream(
-                    _,
-                    mystic,
-                    user_id,
-                    details,
-                    chat_id,
-                    user_name,
-                    message.chat.id,
-                    video=True,
-                    streamtype="telegram",
-                    forceplay=fplay,
-                )
-            except Exception as e:
-                ex_type = type(e).__name__
-                err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-                return await mystic.edit_text(err)
-            return await mystic.delete()
-        return
-    elif url:
-        if await YouTube.exists(url):
-            if "playlist" in url:
-                try:
-                    details = await YouTube.playlist(
-                        url,
-                        config.PLAYLIST_FETCH_LIMIT,
-                        message.from_user.id,
-                    )
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "playlist"
-                plist_type = "yt"
-                if "&" in url:
-                    plist_id = (url.split("=")[1]).split("&")[0]
-                else:
-                    plist_id = url.split("=")[1]
-                img = config.PLAYLIST_IMG_URL
-                cap = _["play_9"]
-            else:
-                try:
-                    details, track_id = await YouTube.track(url)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "youtube"
-                img = details["thumb"]
-                cap = _["play_10"].format(
-                    details["title"],
-                    details["duration_min"],
-                )
-        elif await Spotify.valid(url):
-            spotify = True
-            if not config.SPOTIFY_CLIENT_ID and not config.SPOTIFY_CLIENT_SECRET:
-                return await mystic.edit_text(
-                    "» sᴘᴏᴛɪғʏ ɪs ɴᴏᴛ sᴜᴘᴘᴏʀᴛᴇᴅ ʏᴇᴛ.\n\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ."
-                )
-            if "track" in url:
-                try:
-                    details, track_id = await Spotify.track(url)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "youtube"
-                img = details["thumb"]
-                cap = _["play_10"].format(details["title"], details["duration_min"])
-            elif "playlist" in url:
-                try:
-                    details, plist_id = await Spotify.playlist(url)
-                except Exception:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "playlist"
-                plist_type = "spplay"
-                img = config.SPOTIFY_PLAYLIST_IMG_URL
-                cap = _["play_11"].format(app.mention, message.from_user.mention)
-            elif "album" in url:
-                try:
-                    details, plist_id = await Spotify.album(url)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "playlist"
-                plist_type = "spalbum"
-                img = config.SPOTIFY_ALBUM_IMG_URL
-                cap = _["play_11"].format(app.mention, message.from_user.mention)
-            elif "artist" in url:
-                try:
-                    details, plist_id = await Spotify.artist(url)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "playlist"
-                plist_type = "spartist"
-                img = config.SPOTIFY_ARTIST_IMG_URL
-                cap = _["play_11"].format(message.from_user.first_name)
-            else:
-                return await mystic.edit_text(_["play_15"])
-        elif await Apple.valid(url):
-            if "album" in url:
-                try:
-                    details, track_id = await Apple.track(url)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "youtube"
-                img = details["thumb"]
-                cap = _["play_10"].format(details["title"], details["duration_min"])
-            elif "playlist" in url:
-                spotify = True
-                try:
-                    details, plist_id = await Apple.playlist(url)
-                except:
-                    return await mystic.edit_text(_["play_3"])
-                streamtype = "playlist"
-                plist_type = "apple"
-                cap = _["play_12"].format(app.mention, message.from_user.mention)
-                img = url
-            else:
-                return await mystic.edit_text(_["play_3"])
-        elif await Resso.valid(url):
-            try:
-                details, track_id = await Resso.track(url)
-            except:
-                return await mystic.edit_text(_["play_3"])
-            streamtype = "youtube"
-            img = details["thumb"]
-            cap = _["play_10"].format(details["title"], details["duration_min"])
-        elif await SoundCloud.valid(url):
-            try:
-                details, track_path = await SoundCloud.download(url)
-            except:
-                return await mystic.edit_text(_["play_3"])
-            duration_sec = details["duration_sec"]
-            if duration_sec > config.DURATION_LIMIT:
-                return await mystic.edit_text(
-                    _["play_6"].format(
-                        config.DURATION_LIMIT_MIN,
-                        app.mention,
-                    )
-                )
-            try:
-                await stream(
-                    _,
-                    mystic,
-                    user_id,
-                    details,
-                    chat_id,
-                    user_name,
-                    message.chat.id,
-                    streamtype="soundcloud",
-                    forceplay=fplay,
-                )
-            except Exception as e:
-                ex_type = type(e).__name__
-                err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-                return await mystic.edit_text(err)
-            return await mystic.delete()
-        else:
-            try:
-                await RAUSHAN.stream_call(url)
-            except NoActiveGroupCall:
-                await mystic.edit_text(_["black_9"])
-                return await app.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=_["play_17"],
-                )
-            except Exception as e:
-                return await mystic.edit_text(_["general_2"].format(type(e).__name__))
-            await mystic.edit_text(_["str_2"])
-            try:
-                await stream(
-                    _,
-                    mystic,
-                    message.from_user.id,
-                    url,
-                    chat_id,
-                    message.from_user.first_name,
-                    message.chat.id,
-                    video=video,
-                    streamtype="index",
-                    forceplay=fplay,
-                )
-            except Exception as e:
-                ex_type = type(e).__name__
-                err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-                return await mystic.edit_text(err)
-            return await play_logs(message, streamtype="M3u8 or Index Link")
-    else:
-        if len(message.command) < 2:
-            buttons = botplaylist_markup(_)
-            return await mystic.edit_text(
-                _["play_18"],
-                reply_markup=InlineKeyboardMarkup(buttons),
-            )
-        slider = True
-        query = message.text.split(None, 1)[1]
-        if "-v" in query:
-            query = query.replace("-v", "")
-        try:
-            details, track_id = await YouTube.track(query)
-        except:
-            return await mystic.edit_text(_["play_3"])
-        streamtype = "youtube"
-    if str(playmode) == "Direct":
-        if not plist_type:
-            if details["duration_min"]:
-                duration_sec = time_to_seconds(details["duration_min"])
-                if duration_sec > config.DURATION_LIMIT:
-                    return await mystic.edit_text(
-                        _["play_6"].format(config.DURATION_LIMIT_MIN, app.mention)
-                    )
-            else:
-                buttons = livestream_markup(
-                    _,
-                    track_id,
-                    user_id,
-                    "v" if video else "a",
-                    "c" if channel else "g",
-                    "f" if fplay else "d",
-                )
-                return await mystic.edit_text(
-                    _["play_13"],
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                )
-        try:
-            await stream(
-                _,
-                mystic,
-                user_id,
-                details,
-                chat_id,
-                user_name,
-                message.chat.id,
-                video=video,
-                streamtype=streamtype,
-                spotify=spotify,
-                forceplay=fplay,
-            )
-        except Exception as e:
-            ex_type = type(e).__name__
-            err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-            return await mystic.edit_text(err)
-        await mystic.delete()
-        return await play_logs(message, streamtype=streamtype)
-    else:
-        if plist_type:
-            ran_hash = "".join(
-                random.choices(string.ascii_uppercase + string.digits, k=10)
-            )
-            lyrical[ran_hash] = plist_id
-            buttons = playlist_markup(
-                _,
-                ran_hash,
-                message.from_user.id,
-                plist_type,
-                "c" if channel else "g",
-                "f" if fplay else "d",
-            )
-            await mystic.delete()
-            await message.reply_photo(
-                photo=img,
-                caption=cap,
-                reply_markup=InlineKeyboardMarkup(buttons),
-            )
-            return await play_logs(message, streamtype=f"Playlist : {plist_type}")
-        else:
-            if slider:
-                buttons = slider_markup(
-                    _,
-                    track_id,
-                    message.from_user.id,
-                    query,
-                    0,
-                    "c" if channel else "g",
-                    "f" if fplay else "d",
-                )
-                await mystic.delete()
-                await message.reply_photo(
-                    photo=details["thumb"],
-                    caption=_["play_10"].format(
-                        details["title"].title(),
-                        details["duration_min"],
-                    ),
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                )
-                return await play_logs(message, streamtype=f"Searched on Youtube")
-            else:
-                buttons = track_markup(
-                    _,
-                    track_id,
-                    message.from_user.id,
-                    "c" if channel else "g",
-                    "f" if fplay else "d",
-                )
-                await mystic.delete()
-                await message.reply_photo(
-                    photo=img,
-                    caption=cap,
-                    reply_markup=InlineKeyboardMarkup(buttons),
-                )
-                return await play_logs(message, streamtype=f"URL Searched Inline")
-
-
-@app.on_callback_query(filters.regex("MusicStream") & ~BANNED_USERS)
-@languageCB
-async def play_music(client, CallbackQuery, _):
-    callback_data = CallbackQuery.data.strip()
-    callback_request = callback_data.split(None, 1)[1]
-    vidid, user_id, mode, cplay, fplay = callback_request.split("|")
-    if CallbackQuery.from_user.id != int(user_id):
-        try:
-            return await CallbackQuery.answer(_["playcb_1"], show_alert=True)
-        except:
-            return
-    try:
-        chat_id, channel = await get_channeplayCB(_, cplay, CallbackQuery)
-    except:
-        return
-    user_name = CallbackQuery.from_user.first_name
-    try:
-        await CallbackQuery.message.delete()
-        await CallbackQuery.answer()
-    except:
-        pass
-    mystic = await CallbackQuery.message.reply_text(
-        _["play_2"].format(channel) if channel else _["play_1"]
-    )
-    try:
-        details, track_id = await YouTube.track(vidid, True)
-    except:
-        return await mystic.edit_text(_["play_3"])
-    if details["duration_min"]:
-        duration_sec = time_to_seconds(details["duration_min"])
-        if duration_sec > config.DURATION_LIMIT:
-            return await mystic.edit_text(
-                _["play_6"].format(config.DURATION_LIMIT_MIN, app.mention)
-            )
-    else:
-        buttons = livestream_markup(
-            _,
-            track_id,
-            CallbackQuery.from_user.id,
-            mode,
-            "c" if cplay == "c" else "g",
-            "f" if fplay else "d",
-        )
-        return await mystic.edit_text(
-            _["play_13"],
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
-    video = True if mode == "v" else None
-    ffplay = True if fplay == "f" else None
-    try:
-        await stream(
-            _,
-            mystic,
-            CallbackQuery.from_user.id,
-            details,
-            chat_id,
-            user_name,
-            CallbackQuery.message.chat.id,
-            video,
-            streamtype="youtube",
-            forceplay=ffplay,
-        )
-    except Exception as e:
-        ex_type = type(e).__name__
-        err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-        return await mystic.edit_text(err)
-    return await mystic.delete()
-
-
-@app.on_callback_query(filters.regex("RAUSHANmousAdmin") & ~BANNED_USERS)
-async def RAUSHANmous_check(client, CallbackQuery):
-    try:
-        await CallbackQuery.answer(
-            "» ʀᴇᴠᴇʀᴛ ʙᴀᴄᴋ ᴛᴏ ᴜsᴇʀ ᴀᴄᴄᴏᴜɴᴛ :\n\nᴏᴘᴇɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs.\n-> ᴀᴅᴍɪɴɪsᴛʀᴀᴛᴏʀs\n-> ᴄʟɪᴄᴋ ᴏɴ ʏᴏᴜʀ ɴᴀᴍᴇ\n-> ᴜɴᴄʜᴇᴄᴋ ᴀɴᴏɴʏᴍᴏᴜs ᴀᴅᴍɪɴ ᴘᴇʀᴍɪssɪᴏɴs.",
-            show_alert=True,
-        )
-    except:
-        pass
-
-
-@app.on_callback_query(filters.regex("RAUSHANPlaylists") & ~BANNED_USERS)
-@languageCB
-async def play_playlists_command(client, CallbackQuery, _):
-    callback_data = CallbackQuery.data.strip()
-    callback_request = callback_data.split(None, 1)[1]
-    (
-        videoid,
-        user_id,
-        ptype,
-        mode,
-        cplay,
-        fplay,
-    ) = callback_request.split("|")
-    if CallbackQuery.from_user.id != int(user_id):
-        try:
-            return await CallbackQuery.answer(_["playcb_1"], show_alert=True)
-        except:
-            return
-    try:
-        chat_id, channel = await get_channeplayCB(_, cplay, CallbackQuery)
-    except:
-        return
-    user_name = CallbackQuery.from_user.first_name
-    await CallbackQuery.message.delete()
-    try:
-        await CallbackQuery.answer()
-    except:
-        pass
-    mystic = await CallbackQuery.message.reply_text(
-        _["play_2"].format(channel) if channel else _["play_1"]
-    )
-    videoid = lyrical.get(videoid)
-    video = True if mode == "v" else None
-    ffplay = True if fplay == "f" else None
-    spotify = True
-    if ptype == "yt":
-        spotify = False
-        try:
-            result = await YouTube.playlist(
-                videoid,
-                config.PLAYLIST_FETCH_LIMIT,
-                CallbackQuery.from_user.id,
-                True,
-            )
-        except:
-            return await mystic.edit_text(_["play_3"])
-    if ptype == "spplay":
-        try:
-            result, spotify_id = await Spotify.playlist(videoid)
-        except:
-            return await mystic.edit_text(_["play_3"])
-    if ptype == "spalbum":
-        try:
-            result, spotify_id = await Spotify.album(videoid)
-        except:
-            return await mystic.edit_text(_["play_3"])
-    if ptype == "spartist":
-        try:
-            result, spotify_id = await Spotify.artist(videoid)
-        except:
-            return await mystic.edit_text(_["play_3"])
-    if ptype == "apple":
-        try:
-            result, apple_id = await Apple.playlist(videoid, True)
-        except:
-            return await mystic.edit_text(_["play_3"])
-    try:
-        await stream(
-            _,
-            mystic,
-            user_id,
-            result,
-            chat_id,
-            user_name,
-            CallbackQuery.message.chat.id,
-            video,
-            streamtype="playlist",
-            spotify=spotify,
-            forceplay=ffplay,
-        )
-    except Exception as e:
-        ex_type = type(e).__name__
-        err = e if ex_type == "AssistantErr" else _["general_2"].format(ex_type)
-        return await mystic.edit_text(err)
-    return await mystic.delete()
-
-
-@app.on_callback_query(filters.regex("slider") & ~BANNED_USERS)
-@languageCB
-async def slider_queries(client, CallbackQuery, _):
-    callback_data = CallbackQuery.data.strip()
-    callback_request = callback_data.split(None, 1)[1]
-    (
-        what,
-        rtype,
-        query,
-        user_id,
-        cplay,
-        fplay,
-    ) = callback_request.split("|")
-    if CallbackQuery.from_user.id != int(user_id):
-        try:
-            return await CallbackQuery.answer(_["playcb_1"], show_alert=True)
-        except:
-            return
-    what = str(what)
-    rtype = int(rtype)
-    if what == "F":
-        if rtype == 9:
-            query_type = 0
-        else:
-            query_type = int(rtype + 1)
-        try:
-            await CallbackQuery.answer(_["playcb_2"])
-        except:
-            pass
-        title, duration_min, thumbnail, vidid = await YouTube.slider(query, query_type)
-        buttons = slider_markup(_, vidid, user_id, query, query_type, cplay, fplay)
-        med = InputMediaPhoto(
-            media=thumbnail,
-            caption=_["play_10"].format(
-                title.title(),
-                duration_min,
+        ],
+        [
+            InlineKeyboardButton(
+                text="ʀᴇᴘʟᴀʏ", callback_data=f"ADMIN Replay|{chat_id}"
             ),
-        )
-        return await CallbackQuery.edit_message_media(
-            media=med, reply_markup=InlineKeyboardMarkup(buttons)
-        )
-    if what == "B":
-        if rtype == 0:
-            query_type = 9
-        else:
-            query_type = int(rtype - 1)
-        try:
-            await CallbackQuery.answer(_["playcb_2"])
-        except:
-            pass
-        title, duration_min, thumbnail, vidid = await YouTube.slider(query, query_type)
-        buttons = slider_markup(_, vidid, user_id, query, query_type, cplay, fplay)
-        med = InputMediaPhoto(
-            media=thumbnail,
-            caption=_["play_10"].format(
-                title.title(),
-                duration_min,
+            InlineKeyboardButton(text="ᴇɴᴅ", callback_data=f"ADMIN Stop|{chat_id}"),
+        ],
+    ]
+
+    return buttons
+
+
+def stream_markup_timer(_, videoid, chat_id, played, dur):
+    played_sec = time_to_seconds(played)
+    duration_sec = time_to_seconds(dur)
+    percentage = (played_sec / duration_sec) * 100
+    umm = math.floor(percentage)
+    if 0 < umm <= 10:
+        bar = "❖◈◈◈◈◈◈◈◈◈"
+    elif 10 < umm < 20:
+        bar = "◈❖◈◈◈◈◈◈◈◈"
+    elif 20 <= umm < 30:
+        bar = "◈◈❖◈◈◈◈◈◈◈"
+    elif 30 <= umm < 40:
+        bar = "◈◈◈❖◈◈◈◈◈◈"
+    elif 40 <= umm < 50:
+        bar = "◈◈◈◈❖◈◈◈◈◈"
+    elif 50 <= umm < 60:
+        bar = "◈◈◈◈◈❖◈◈◈◈"
+    elif 60 <= umm < 70:
+        bar = "◈◈◈◈◈◈❖◈◈◈"
+    elif 70 <= umm < 80:
+        bar = "◈◈◈◈◈◈◈❖◈◈"
+    elif 80 <= umm < 95:
+        bar = "◈◈◈◈◈◈◈◈❖◈"
+    else:
+        bar = "◈◈◈◈◈◈◈◈◈❖"
+
+    buttons = [
+        [
+            InlineKeyboardButton(text="ʀᴇsᴜᴍᴇ", callback_data=f"ADMIN Resume|{chat_id}"),
+            InlineKeyboardButton(text="ᴘᴀᴜsᴇ", callback_data=f"ADMIN Pause|{chat_id}"),
+            InlineKeyboardButton(text="ʀᴇᴘʟᴀʏ", callback_data=f"ADMIN Replay|{chat_id}")
+        ],
+        [
+            InlineKeyboardButton(text="sᴋɪᴘ", callback_data=f"ADMIN Skip|{chat_id}"),
+            InlineKeyboardButton(text="sᴛᴏᴘ", callback_data=f"ADMIN Stop|{chat_id}"),
+        ],
+        [
+            InlineKeyboardButton(
+                text=f"{played} {bar} {dur}",
+                callback_data="GetTimer",
+            )
+        ],
+        [
+
+            InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
+        ]
+
+    return buttons
+
+
+def stream_markup(_, videoid, chat_id):
+    buttons = [
+        [
+            InlineKeyboardButton(text="ʀᴇsᴜᴍᴇ", callback_data=f"ADMIN Resume|{chat_id}"),
+            InlineKeyboardButton(text="ᴘᴀᴜsᴇ", callback_data=f"ADMIN Pause|{chat_id}"),
+            InlineKeyboardButton(text="ʀᴇᴘʟᴀʏ", callback_data=f"ADMIN Replay|{chat_id}")
+         ],
+         [
+            InlineKeyboardButton(text="sᴋɪᴘ", callback_data=f"ADMIN Skip|{chat_id}"),
+            InlineKeyboardButton(text="sᴛᴏᴘ", callback_data=f"ADMIN Stop|{chat_id}"),
+         ],
+         [
+
+     InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
+    ]
+
+    return buttons
+
+
+def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"RAUSHANPlaylists {videoid}|{user_id}|{ptype}|a|{channel}|{fplay}",
             ),
-        )
-        return await CallbackQuery.edit_message_media(
-            media=med, reply_markup=InlineKeyboardMarkup(buttons)
-        )
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"RAUSHANPlaylists {videoid}|{user_id}|{ptype}|v|{channel}|{fplay}",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+            ),
+        ],
+    ]
+    return buttons
+
+
+def livestream_markup(_, videoid, user_id, mode, channel, fplay):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_3"],
+                callback_data=f"LiveStream {videoid}|{user_id}|{mode}|{channel}|{fplay}",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+            ),
+        ],
+    ]
+    return buttons
+
+
+def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
+    query = f"{query[:20]}"
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}",
+            ),
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="◁",
+                callback_data=f"slider B|{query_type}|{query}|{user_id}|{channel}|{fplay}",
+            ),
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {query}|{user_id}",
+            ),
+            InlineKeyboardButton(
+                text="▷",
+                callback_data=f"slider F|{query_type}|{query}|{user_id}|{channel}|{fplay}",
+            ),
+        ],
+    ]
+    return buttons
+
+
+## Queue Markup
+
+
+def queue_markup(_, videoid, chat_id):
+
+    buttons = [
+        [
+            InlineKeyboardButton(text="ʀᴇsᴜᴍᴇ", callback_data=f"ADMIN Resume|{chat_id}"),
+            InlineKeyboardButton(text="ᴘᴀᴜsᴇ", callback_data=f"ADMIN Pause|{chat_id}"),
+            InlineKeyboardButton(text="ʀᴇᴘʟᴀʏ", callback_data=f"ADMIN Replay|{chat_id}")
+            ],
+            [
+            InlineKeyboardButton(text="sᴋɪᴘ", callback_data=f"ADMIN Skip|{chat_id}"),
+            InlineKeyboardButton(text="sᴛᴏᴘ", callback_data=f"ADMIN Stop|{chat_id}"),
+            ],
+            [
+            InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")
+            ],
+    ]
+
+    return buttons
+
+
+def telegram_markup(_, chat_id):
+    buttons = [
+        [
+            InlineKeyboardButton(text="ʀᴇsᴜᴍᴇ", callback_data=f"ADMIN Resume|{chat_id}"),
+            InlineKeyboardButton(text="ᴘᴀᴜsᴇ", callback_data=f"ADMIN Pause|{chat_id}"),
+            InlineKeyboardButton(text="ʀᴇᴘʟᴀʏ", callback_data=f"ADMIN Replay|{chat_id}")
+        ],
+        [
+            InlineKeyboardButton(text="sᴋɪᴘ", callback_data=f"ADMIN Skip|{chat_id}"),
+            InlineKeyboardButton(text="sᴛᴏᴘ", callback_data=f"ADMIN Stop|{chat_id}"),
+        ],
+        [
+            InlineKeyboardButton(text=_["CLOSEMENU_BUTTON"], callback_data="close"),
+        ],
+    ]
+    return buttons
+
+
+def telegram_markup_timer(_, chat_id, played, dur):
+    played_sec = time_to_seconds(played)
+    duration_sec = time_to_seconds(dur)
+    percentage = (played_sec / duration_sec) * 100
+    anon = math.floor(percentage)
+    if 0 < anon <= 2:
+        bar = "⚡sᴛᴀʀᴛᴇᴅ ᴘʟᴀʏɪɴɢ⚡"
+    elif 2 < anon < 3:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 3 <= anon < 4:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 4 <= anon < 5:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 6 <= anon < 7:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 7 <= anon < 8:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 9 <= anon < 10:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 11 <= anon < 12:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 12 <= anon < 13:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 13 < anon < 14:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 14 <= anon < 15:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 15 <= anon < 16:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 16 <= anon < 17:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 17 <= anon < 18:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 18 <= anon < 19:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 19 <= anon < 20:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 20 <= anon < 21:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 21 <= anon < 22:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 22 <= anon < 23:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 23 <= anon < 24:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 24 <= anon < 25:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 25 <= anon < 26:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 26 <= anon < 27:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 27 <= anon < 28:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 28 <= anon < 29:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 29 <= anon < 30:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 30 <= anon < 31:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 31 <= anon < 32:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 32 <= anon < 33:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 33 <= anon < 34:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 34 <= anon < 35:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 35 <= anon < 36:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 36 <= anon < 37:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 37 <= anon < 38:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 38 <= anon < 39:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 39 <= anon < 40:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 40 <= anon < 41:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 41 <= anon < 42:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 42 <= anon < 43:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 43 <= anon < 44:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 44 < anon < 45:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 45 <= anon < 46:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 46 <= anon < 47:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 47 <= anon < 48:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 48 <= anon < 49:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 49 <= anon < 50:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 50 <= anon < 51:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 51 <= anon < 52:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 52 <= anon < 53:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 53 <= anon < 54:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 54 <= anon < 55:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 55 <= anon < 56:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 56 <= anon < 57:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 57 <= anon < 58:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 58 <= anon < 59:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 59 <= anon < 60:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 60 <= anon < 61:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 61 <= anon < 62:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 62 <= anon < 63:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 63 <= anon < 64:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 64 <= anon < 65:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 65 <= anon < 66:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 66 <= anon < 67:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 67 <= anon < 68:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 68 <= anon < 69:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 69 <= anon < 70:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 70 <= anon < 71:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 71 <= anon < 72:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 72 <= anon < 73:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 73 <= anon < 74:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 74 <= anon < 75:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 75 <= anon < 76:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 76 < anon < 77:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 77 <= anon < 78:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 78 <= anon < 79:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 79 <= anon < 80:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 80 <= anon < 81:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 81 <= anon < 82:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 82 <= anon < 83:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 83 <= anon < 84:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 84 <= anon < 85:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 85 <= anon < 86:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 86 <= anon < 87:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 87 <= anon < 88:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 88 <= anon < 89:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 89 <= anon < 90:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 90 <= anon < 91:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 91 <= anon < 92:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 92 <= anon < 93:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 93 <= anon < 94:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 94 <= anon < 95:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    elif 95 <= anon < 96:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 96 <= anon < 97:
+        bar = "ﮩ♡٨ـﮩﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+    elif 97 <= anon < 98:
+        bar = "ﮩ٨ـﮩﮩ٨ـﮩ٨ـﮩ♡ﮩ٨ـ"
+    elif 98 <= anon < 99:
+        bar = "ﮩ٨ـﮩﮩ٨ـ♡ﮩ٨ـﮩﮩ٨ـ"
+    else:
+        bar = "ﮩ٨ـﮩ♡ﮩ٨ـﮩ٨ـﮩﮩ٨ـ"
+
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=f"{dur} {bar} {played}",
+                callback_data="GetTimer",
+            )
+        ],
+        [
+            InlineKeyboardButton(text="ʀᴇsᴜᴍᴇ", callback_data=f"ADMIN Resume|{chat_id}"),
+            InlineKeyboardButton(text="ᴘᴀᴜsᴇ", callback_data=f"ADMIN Pause|{chat_id}"),
+            InlineKeyboardButton(text="ʀᴇᴘʟᴀʏ", callback_data=f"ADMIN Replay|{chat_id}")
+         ],
+         [
+            InlineKeyboardButton(text="sᴋɪᴘ", callback_data=f"ADMIN Skip|{chat_id}"),
+            InlineKeyboardButton(text="sᴛᴏᴘ", callback_data=f"ADMIN Stop|{chat_id}"),
+        ],
+        [
+            InlineKeyboardButton(text=_["CLOSEMENU_BUTTON"], callback_data="close"),
+        ],
+    ]
+    return buttons
