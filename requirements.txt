@@ -35,7 +35,6 @@ speedtest-cli
 unidecode
 urllib3
 wget
-numpy
 # Audio Processing Libraries for Higher Sound Quality and Stereo Processing:
 soundfile>=0.10.3  # For reading and writing sound files in various formats
 audioread>=2.1.9  # To decode audio files for playback and processing
