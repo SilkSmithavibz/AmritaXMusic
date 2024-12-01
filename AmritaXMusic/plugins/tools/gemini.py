@@ -4,14 +4,12 @@ from pyrogram import filters
 from pyrogram.enums import ChatAction
 from AmritaXMusic import app
 
-
 @app.on_message(filters.command(["gemini"]))
 async def gemini_handler(client, message):
     await app.send_chat_action(message.chat.id, ChatAction.TYPING)
-    if (
-        message.text.startswith(f"/gemini@{app.username}")
-        and len(message.text.split(" ", 1)) > 1
-    ):
+
+    # Extract user input from the message
+    if message.text.startswith(f"/gemini@{app.username}") and len(message.text.split(" ", 1)) > 1:
         user_input = message.text.split(" ", 1)[1]
     elif message.reply_to_message and message.reply_to_message.text:
         user_input = message.reply_to_message.text
@@ -24,11 +22,22 @@ async def gemini_handler(client, message):
 
     try:
         response = api.gemini(user_input)
-        await app.send_chat_action(message.chat.id, ChatAction.TYPING)
-        x = response["results"]
-        if x:
-            await message.reply_text(x, quote=True)
+
+        # Check if response is None
+        if response is None:
+            await message.reply_text("No response from the API, please try again later.")
+            return
+
+        # Check if 'results' key exists in the response
+        if "results" in response:
+            x = response["results"]
+            if x:
+                await message.reply_text(x, quote=True)
+            else:
+                await message.reply_text("sᴏʀʀʏ sɪʀ! ᴘʟᴇᴀsᴇ Tʀʏ ᴀɢᴀɪɴ")
         else:
-            await message.reply_text("sᴏʀʀʏ sɪʀ! ᴘʟᴇᴀsᴇ Tʀʏ ᴀɢᴀɪɴ")
+            await message.reply_text("No 'results' found in the API response.")
+
     except requests.exceptions.RequestException as e:
-        pass
+        await message.reply_text(f"Error occurred: {str(e)}")
+        
