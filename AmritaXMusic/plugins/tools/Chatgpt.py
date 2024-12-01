@@ -1,4 +1,4 @@
-import openai
+from TheApi import api
 from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
 from config import BANNED_USERS  # Assuming you have banned users defined in your config
