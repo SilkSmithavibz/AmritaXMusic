@@ -30,7 +30,7 @@ def chatgpt(prompt):
 
 
 # Initialize the bot application
-app = Client("my_bot")
+app = Client("AmritaMusicBot")
 
 # Command handler for language detection and chatbot-like responses
 @app.on_message(filters.command(["detect", "aidetect", "asklang"]) & ~BANNED_USERS)
