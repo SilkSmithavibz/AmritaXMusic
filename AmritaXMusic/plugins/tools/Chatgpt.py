@@ -1,3 +1,4 @@
+import openai
 from TheApi import api
 from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
