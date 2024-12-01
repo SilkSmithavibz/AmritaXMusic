@@ -4,7 +4,7 @@ from pyrogram.enums import ChatAction
 from config import BANNED_USERS  # Assuming you have banned users defined in your config
 
 # Set your OpenAI API key
-openai.api_key = 'your-openai-api-key'  # Replace with your actual OpenAI API key
+openai.api_key = 'ckey_01cdf01902dc8a2773eb58b2cac8'  # Replace with your actual OpenAI API key
 
 # Function to interact with OpenAI's API
 def chatgpt(prompt):
