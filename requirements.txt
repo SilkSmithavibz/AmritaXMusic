@@ -46,3 +46,4 @@ git+https://github.com/joetats/youtube_search@master
 git+https://github.com/Vivekkumar-IN/TheApi@main
 bing-image-urls
 git+https://github.com/TEAMPURVI/PurviAPI
+git+https://github.com/openai/openai-python
