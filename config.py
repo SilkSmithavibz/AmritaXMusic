@@ -7,30 +7,30 @@ from pyrogram import filters
 load_dotenv()
 
 # Get this value from my.telegram.org/apps
-API_ID = int(getenv("API_ID",20650066))
-API_HASH = getenv("API_HASH","7a4f8ed638f1369a40693574c2835217")
+API_ID = int(getenv(20650066))
+API_HASH = getenv("7a4f8ed638f1369a40693574c2835217")
 
 # Get your token from @BotFather on Telegram.
-BOT_TOKEN = getenv("BOT_TOKEN","8007775153:AAHhS8p1EfdR8wwKRh4z2nBhG5nc11fdFvQ)
+BOT_TOKEN = getenv("8007775153:AAHhS8p1EfdR8wwKRh4z2nBhG5nc11fdFvQ")
 # -------------------------------------------------------
-OWNER_USERNAME = getenv("OWNER_USERNAME","anjlnobita_i")
+OWNER_USERNAME = getenv("anjlnobita_i")
 # --------------------------------------------------------
-BOT_USERNAME = getenv("BOT_USERNAME","hinata_hyuga_bbot")
+BOT_USERNAME = getenv("hinata_hyuga_bbot")
 # --------------------------------------------------------
 BOT_NAME = getenv("BOT_NAME")
 # ---------------------------------------------------------
 
 
 # Get your mongo url from cloud.mongodb.com
-MONGO_DB_URI = getenv("MONGO_DB_URI","mongodb+srv://anjlnobita:tCUPU9Ty1FFvLumv@cluster0.appf0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", None)
+MONGO_DB_URI = getenv("mongodb+srv://anjlnobita:tCUPU9Ty1FFvLumv@cluster0.appf0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", None)
 
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
 
 # Chat id of a group for logging bot's activities
-LOGGER_ID = int(getenv("LOGGER_ID", -1002372313866))
+LOGGER_ID = int(getenv( -1002372313866))
 
 # Get this value from @PURVI_HELP_BOT on Telegram by /id
-OWNER_ID = int(getenv("OWNER_ID", 6777860063))
+OWNER_ID = int(getenv( 6777860063))
 
 
 # make your bots privacy from telegra.ph and put your url here 
@@ -51,8 +51,8 @@ GIT_TOKEN = getenv(
     "GIT_TOKEN", None
 )  # Fill this variable if your upstream repository is private
 
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/anjlnobita")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT","https://t.me/anime_societyy")
+SUPPORT_CHANNEL = getenv("https://t.me/anjlnobita")
+SUPPORT_CHAT = getenv("https://t.me/anime_societyy")
 
 # Set this to True if you want the assistant to automatically leave chats after an interval
 AUTO_LEAVING_ASSISTANT = bool(getenv("AUTO_LEAVING_ASSISTANT", False))
