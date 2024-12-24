@@ -12,11 +12,6 @@ from pytgcalls.exceptions import (
     NoActiveGroupCall,
     
 )
-from pytgcalls.types import (
-    AudioQuality,
-    VideoQuality,
-    Update,
-)
 from pytgcalls.types.stream import StreamAudioEnded
 
 import config
