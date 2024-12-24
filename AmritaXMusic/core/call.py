@@ -12,6 +12,7 @@ from pytgcalls.exceptions import (
     NoActiveGroupCall,
     
 )
+from pytgcalls.types import Update
 from pytgcalls.types.stream import StreamAudioEnded
 
 import config
