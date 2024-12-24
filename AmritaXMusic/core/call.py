@@ -13,7 +13,6 @@ from pytgcalls.exceptions import (
     
 )
 from pytgcalls.types import (
-    MediaStream,
     AudioQuality,
     VideoQuality,
     Update,
