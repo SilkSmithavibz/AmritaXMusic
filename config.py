@@ -17,7 +17,7 @@ OWNER_USERNAME = getenv("OWNER_USERNAME","The_Architect04")
 # --------------------------------------------------------
 BOT_USERNAME = getenv("BOT_USERNAME","AmritaMusicBot")
 # --------------------------------------------------------
-BOT_NAME = getenv("BOT_NAME")
+BOT_NAME = getenv("SilkSmithavibz")
 # ---------------------------------------------------------
 
 
@@ -27,10 +27,10 @@ MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 17000))
 
 # Chat id of a group for logging bot's activities
-LOGGER_ID = int(getenv("LOGGER_ID", -1002278361416))
+LOGGER_ID = int(getenv("LOGGER_ID",  -1002279841047))
 
 # Get this value from @PURVI_HELP_BOT on Telegram by /id
-OWNER_ID = int(getenv("OWNER_ID", 7224419362))
+OWNER_ID = int(getenv("OWNER_ID", 6573727420))
 
 
 # make your bots privacy from telegra.ph and put your url here 
@@ -44,15 +44,15 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "https://github.com/Marwin040/AmritaXMusic",
+    "https://github.com/SilkSmithavibz/AmritaXMusic",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "master")
 GIT_TOKEN = getenv(
     "GIT_TOKEN", None
 )  # Fill this variable if your upstream repository is private
 
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/Team_Supporty")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT","https://t.me/Team_Supporty")
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/VP_Music247")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT","https://t.me/Tamil_VP247")
 
 # Set this to True if you want the assistant to automatically leave chats after an interval
 AUTO_LEAVING_ASSISTANT = bool(getenv("AUTO_LEAVING_ASSISTANT", False))
@@ -90,13 +90,13 @@ confirmer = {}
 
 
 START_IMG_URL = getenv(
-    "START_IMG_URL", "https://envs.sh/5SL.jpg"
+    "START_IMG_URL", "https://envs.sh/JU3.jpg"
 )
 PING_IMG_URL = getenv(
-    "PING_IMG_URL", "https://envs.sh/5S5.jpg"
+    "PING_IMG_URL", "https://envs.sh/JUY.jpg"
 )
 PLAYLIST_IMG_URL = "https://envs.sh/_IP.jpg"
-STATS_IMG_URL = "https://envs.sh/5SK.jpg"
+STATS_IMG_URL = "https://envs.sh/JUC.jpg"
 TELEGRAM_AUDIO_URL = "https://telegra.ph/file/51cb8a22e65caa4382879.jpg"
 TELEGRAM_VIDEO_URL = "https://telegra.ph/file/51cb8a22e65caa4382879.jpg"
 STREAM_IMG_URL = "https://te.legra.ph/file/bd995b032b6bd263e2cc9.jpg"
