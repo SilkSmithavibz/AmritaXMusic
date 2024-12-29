@@ -26,7 +26,6 @@ from pytgcalls.exceptions import AlreadyJoinedError, NoActiveGroupCall
 from pytgcalls.types import (
     JoinedGroupCallParticipant,
     LeftGroupCallParticipant,
-    MediaStream,
     Update,
 )
 from pytgcalls.types.stream import StreamAudioEnded
