@@ -11,7 +11,7 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Union
 
-from ntgcalls import TelegramServerError
+
 from pyrogram import Client
 from pyrogram.enums import ChatMembersFilter, ChatMemberStatus
 from pyrogram.errors import (
