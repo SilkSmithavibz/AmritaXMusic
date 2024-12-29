@@ -8,8 +8,8 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from youtubesearchpython.__future__ import VideosSearch
 
-from AmritaXMusic.utils.database import is_on_off
-from AmritaXMusic.utils.formatters import time_to_seconds
+from ANNIEMUSIC.utils.database import is_on_off
+from ANNIEMUSIC.utils.formatters import time_to_seconds
 
 async def shell_cmd(cmd):
     proc = await asyncio.create_subprocess_shell(
@@ -26,7 +26,7 @@ async def shell_cmd(cmd):
     return out.decode("utf-8")
 
 
-cookies_file = "AmritaXMusic/assets/cookies.txt"
+cookies_file = "ANNIEMUSIC/assets/cookies.txt"
 
 class YouTubeAPI:
     def __init__(self):
@@ -263,7 +263,7 @@ class YouTubeAPI:
 
         def video_dl():
             ydl_optssx = {
-                "format": "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
+                "format": "(best[height<=?720][width<=?1280])",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
                 "geo_bypass": True,
                 "nocheckcertificate": True,
@@ -291,7 +291,7 @@ class YouTubeAPI:
                 "no_warnings": True,
                 "prefer_ffmpeg": True,
                 "merge_output_format": "mp4",
-                "cookiefile": cookies_file,  # Add cookie file option here
+                "cookiefile": cookies_file,
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
@@ -299,8 +299,7 @@ class YouTubeAPI:
         def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
             ydl_optssx = {
-                "extractaudio": True,
-                "format":  format_id,
+                "format": format_id,
                 "outtmpl": fpath,
                 "geo_bypass": True,
                 "nocheckcertificate": True,
@@ -309,15 +308,12 @@ class YouTubeAPI:
                 "prefer_ffmpeg": True,
                 "postprocessors": [
                     {
-                        'key': 'FFmpegExtractAudio',
-                        'preferredcodec': 'mp3',  
-                        "preferredquality": "8000",
-                        'audio_bitrate': '8000k',    
-                        'audio_channels': 2,
-                        'audio_sample_rate': '44100'
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192",
                     }
                 ],
-                "cookiefile": cookies_file,  # Add cookie file option here
+                "cookiefile": cookies_file,
             }
             x = yt_dlp.YoutubeDL(ydl_optssx)
             x.download([link])
