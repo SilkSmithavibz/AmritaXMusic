@@ -33,9 +33,9 @@ from pytgcalls.types.stream import StreamAudioEnded
 
 import config
 from strings import get_string
-from VIPMUSIC import LOGGER, YouTube, app
-from VIPMUSIC.misc import db
-from VIPMUSIC.utils.database import (
+from AmritaXMusic import LOGGER, YouTube, app
+from AmritaXMusic.misc import db
+from AmritaXMusic.utils.database import (
     add_active_chat,
     add_active_video_chat,
     get_assistant,
@@ -50,11 +50,11 @@ from VIPMUSIC.utils.database import (
     remove_active_video_chat,
     set_loop,
 )
-from VIPMUSIC.utils.exceptions import AssistantErr
-from VIPMUSIC.utils.formatters import check_duration, seconds_to_min, speed_converter
-from VIPMUSIC.utils.inline.play import stream_markup, telegram_markup
-from VIPMUSIC.utils.stream.autoclear import auto_clean
-from VIPMUSIC.utils.thumbnails import gen_thumb
+from AmritaXMusic.utils.exceptions import AssistantErr
+from AmritaXMusic.utils.formatters import check_duration, seconds_to_min, speed_converter
+from AmritaXMusic.utils.inline.play import stream_markup, telegram_markup
+from AmritaXMusic.utils.stream.autoclear import auto_clean
+from AmritaXMusic.utils.thumbnails import get_thumb
 
 active = []
 autoend = {}
@@ -834,4 +834,4 @@ class Call(PyTgCalls):
                 autoend[chat_id] = {}
 
 
-VIP = Call()
+RAUSHAN = Call()
