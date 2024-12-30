@@ -5,7 +5,7 @@ from pyrogram.enums import ChatMembersFilter
 from pyrogram.errors import FloodWait
 
 from AmritaXMusic import app
-from AmritaXMusic.misc import SUDOERS
+from AmritaXMusic.misc import OWNER_ID
 from AmritaXMusic.utils.database import (
     get_active_chats,
     get_authuser_names,
@@ -20,7 +20,7 @@ from config import adminlist
 IS_BROADCASTING = False
 
 
-@app.on_message(filters.command(["broadcast", "gcast"]) & SUDOERS)
+@app.on_message(filters.command(["broadcast", "gcast"]) & OWNER_ID)
 @language
 async def braodcast_message(client, message, _):
     global IS_BROADCASTING
