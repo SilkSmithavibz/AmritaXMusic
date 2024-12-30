@@ -5,7 +5,7 @@ from pyrogram.enums import ChatMembersFilter
 from pyrogram.errors import FloodWait
 
 from AmritaXMusic import app
-from AmritaXMusic.misc import OWNER_ID
+from AmritaXMusic.misc import SUDOERS
 from AmritaXMusic.utils.database import (
     get_active_chats,
     get_authuser_names,
